@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2023 COVID-19 Infection Data</title>
+    <!-- Include D3.js library -->
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        /* CSS styles for the bar chart */
+        .bar {
+            fill: steelblue;
+        }
+
+        .bar:hover {
+            fill: orange;
+        }
+
+        .axis-label {
+            font: 12px sans-serif;
+        }
+
+        .title {
+            font: 16px sans-serif;
+        }
+
+        /* CSS styles for tooltip */
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            width: 60px;
+            height: auto;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* CSS styles for error message */
+        .message {
+            font: 14px sans-serif;
+            color: red;
+        }
+
+        /* CSS styles for average and trend labels */
+        .averageLabel,
+        .trendLabel {
+            fill: red;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* CSS styles for trend line */
+        .line {
+            fill: none;
+            stroke: orange;
+            stroke-width: 2px;
+        }
+
+        /* CSS styles for trend dots */
+        .dot {
+            fill: orange;
+            stroke: white;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Input field for entering country name -->
+    <label for="countryInput">Enter Country Name:</label>
+    <input type="text" id="countryInput" placeholder="Type country name...">
+    <!-- Dropdown for selecting week -->
+    <select id="weekSelector"></select>
+    <!-- Buttons for showing average and trend -->
+    <button id="showAverage">Show Average</button>
+    <button id="showTrend">Show Trend</button>
+    <!-- SVG container for the chart -->
+    <svg id="chart" width="2000" height="500"></svg>
+    <!-- Tooltip display -->
+    <div class="tooltip"></div>
+    <!-- Error or information message display -->
+    <div id="message"></div>
+
+    <!-- JavaScript code for data visualization -->
+    <script>
+        d3.csv("COVID.csv").then(function (data) {
+            // Parsing CSV data and converting strings to numbers
+            data.forEach(function (d) {
+                d['Number of infections in 2023'] = d['Number of infections in 2023'] === '..' ? 0 : +d['Number of infections in 2023'];
+                d['Week number'] = +d['Week number'];
+            });
+
+            // Finding the maximum week number for populating the week selector dropdown
+            var maxWeek = d3.max(data, d => d['Week number']);
+            var weekSelector = d3.select("#weekSelector");
+            // Populating week selector dropdown options
+            for (var i = 1; i <= maxWeek; i++) {
+                weekSelector.append('option').attr('value', i).text('Week ' + i);
+            }
+
+            // SVG container and dimensions setup
+            var svg = d3.select("#chart"),
+                margin = { top: 20, right: 20, bottom: 30, left: 40 },
+                width = +svg.attr("width") - margin.left - margin.right,
+                height = +svg.attr("height") - margin.top - margin.bottom,
+                g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // Scale for x-axis (countries) and y-axis (infection count)
+            var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+                y = d3.scaleLinear().rangeRound([height, 0]);
+
+            // Tooltip for displaying data on hover
+            var tooltip = d3.select(".tooltip");
+            // Variable to keep track of current week
+            var currentWeek = 1;
+
+            // Function to update the chart with provided data
+            function updateChart(weekData) {
+                // Handling case when no data is available
+                if (!weekData.length) {
+                    svg.style("display", "none");
+                    document.getElementById('message').textContent = 'No data available for the selected country or week.';
+                    return;
+                }
+
+                // Displaying the chart and clearing any previous error message
+                svg.style("display", "block");
+                document.getElementById('message').textContent = '';
+                // Setting the domain for x and y scales
+                x.domain(weekData.map(d => d.Country));
+                var maxY = d3.max(weekData, d => d['Number of infections in 2023']);
+                var yDomainMax = Math.max(10, Math.ceil(maxY / 100) * 100);
+                y.domain([0, yDomainMax]);
+
+                // Removing any existing chart elements
+                g.selectAll("*").remove();
+
+                // Adding x-axis
+                g.append("g")
+                    .attr("transform", `translate(0,${height})`)
+                    .call(d3.axisBottom(x));
+
+                // Adding y-axis
+                g.append("g")
+                    .call(d3.axisLeft(y));
+
+                // Adding bars for each country
+                g.selectAll(".bar")
+                    .data(weekData)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("x", d => x(d.Country))
+                    .attr("y", d => y(d['Number of infections in 2023']))
+                    .attr("width", x.bandwidth())
+                    .attr("height", d => height - y(d['Number of infections in 2023']))
+                    .on("mouseover", function (event, d) {
+                        // Showing tooltip on mouseover
+                        tooltip.transition()
+                            .duration(200)
+                            .style("opacity", .9);
+                        tooltip.html("Country: " + d.Country + "<br/>Number of infections: " + d['Number of infections in 2023'])
+                            .style("left", (event.pageX) + "px")
+                            .style("top", (event.pageY - 28) + "px");
+                    })
+                    .on("mouseout", function (d) {
+                        // Hiding tooltip on mouseout
+                        tooltip.transition()
+                            .duration(500)
+                            .style("opacity", 0);
+                    });
+            }
+
+            // Function to show average infections for the selected week
+            function showAverage() {
+                var weekData = data.filter(d => d['Week number'] === currentWeek);
+                var total = d3.sum(weekData, d => d['Number of infections in 2023']);
+                var count = weekData.length;
+                var average = count > 0 ? (total / count) : 0;
+                updateChart(weekData);
+                var averageHeight = y(average);
+
+                // Adding a line and label for average infections
+                g.append("line")
+                    .attr("x1", 0)
+                    .attr("x2", width)
+                    .attr("y1", averageHeight)
+                    .attr("y2", averageHeight)
+                    .style("stroke", "red")
+                    .style("stroke-width", "2");
+
+                g.append("text")
+                    .attr("class", "averageLabel")
+                    .attr("x", width / 2)
+                    .attr("y", averageHeight - 5)
+                    .text(`Average infections in week ${currentWeek}: ${average.toFixed(2)}`);
+            }
+
+            // Function to show trend of average infections over weeks
+            function showTrend() {
+                var averages = [];
+                for (var week = 1; week <= maxWeek; week++) {
+                    var weekData = data.filter(d => d['Week number'] === week);
+                    var total = d3.sum(weekData, d => d['Number of infections in 2023']);
+                    var count = weekData.length;
+                    var average = count > 0 ? total / count : 0;
+                    averages.push({ week: week, average: average });
+                }
+
+                // Scale for x-axis (weeks) and y-axis (average infections)
+                var xTrend = d3.scaleLinear().domain([1, maxWeek]).range([0, width]);
+                var yTrend = d3.scaleLinear().domain([0, d3.max(averages, d => d.average)]).range([height, 0]);
+
+                // Removing any existing chart elements
+                g.selectAll("*").remove();
+
+                // Adding x-axis for trend
+                g.append("g")
+                    .attr("transform", `translate(0,${height})`)
+                    .call(d3.axisBottom(xTrend).tickFormat(d3.format("d")));
+
+                // Adding y-axis for trend
+                g.append("g")
+                    .call(d3.axisLeft(yTrend));
+
+                // Creating trend line
+                var line = d3.line()
+                    .x(function (d) { return xTrend(d.week); })
+                    .y(function (d) { return yTrend(d.average); });
+
+                g.append("path")
+                    .datum(averages)
+                    .attr("class", "line")
+                    .attr("d", line);
+
+                // Adding dots for each week on trend line
+                g.selectAll(".dot")
+                    .data(averages)
+                    .enter().append("circle")
+                    .attr("class", "dot")
+                    .attr("cx", function (d) { return xTrend(d.week); })
+                    .attr("cy", function (d) { return yTrend(d.average); })
+                    .attr("r", 5)
+                    .on("mouseover", function (event, d) {
+                        // Showing tooltip on mouseover
+                        tooltip.transition()
+                            .duration(200)
+                            .style("opacity", .9);
+                        tooltip.html("Week: " + d.week + "<br/>Average: " + d.average.toFixed(2))
+                            .style("left", (event.pageX + 5) + "px")
+                            .style("top", (event.pageY - 28) + "px");
+                    })
+                    .on("mouseout", function (d) {
+                        // Hiding tooltip on mouseout
+                        tooltip.transition()
+                            .duration(500)
+                            .style("opacity", 0);
+                    });
+            }
+
+            // Event listener for week selector change
+            weekSelector.on("change", function () {
+                // Updating current week
+                currentWeek = +this.value;
+                // Getting selected country from input field
+                var selectedCountry = document.getElementById('countryInput').value.trim().toLowerCase();
+                // Filtering data based on selected country and week
+                if (selectedCountry) {
+                    var filteredData = data.filter(d => d.Country.toLowerCase() === selectedCountry && d['Week number'] === currentWeek);
+                    updateChart(filteredData);
+                } else {
+                    // Updating chart with data for selected week
+                    updateChart(data.filter(d => d['Week number'] === currentWeek));
+                }
+            });
+
+            // Event listener for input in country input field
+            document.getElementById("countryInput").addEventListener('input', function () {
+                // Getting input country name and converting to lowercase
+                var inputCountry = this.value.trim().toLowerCase();
+                if (inputCountry) {
+                    // Filtering data based on input country and current week
+                    var filteredData = data.filter(d => d.Country.toLowerCase() === inputCountry && d['Week number'] === currentWeek);
+                    if (filteredData.length > 0) {
+                        updateChart(filteredData);
+                    } else {
+                        // Clearing the chart and showing message if no data found
+                        g.selectAll("*").remove();
+                        document.getElementById('message').textContent = "No data found for " + this.value;
+                    }
+                } else {
+                    // Resetting chart to full data of the selected week
+                    updateChart(data.filter(d => d['Week number'] === currentWeek));
+                }
+            });
+
+            // Event listeners for buttons to show average and trend
+            document.getElementById("showAverage").addEventListener("click", showAverage);
+            document.getElementById("showTrend").addEventListener("click", showTrend);
+
+            // Initializing chart with data for first week
+            updateChart(data.filter(d => d['Week number'] === 1));
+        });
+    </script>
+</body>
+
+</html>
