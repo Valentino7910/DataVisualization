@@ -1,0 +1,48 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.country {
+  stroke: #65676f;
+  cursor: pointer;
+}
+
+.sphere {
+  fill: #1989f2a9;
+}
+
+.tooltip {
+  position:fixed;
+  padding: 12px 24px;
+  font-size: 0.9em;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border: 1px solid #000;
+  border-radius: 4px;
+  box-shadow: 3px 3px 10px 0px rgba(0, 0, 0, 0.25);
+}
+
+
+.map {
+  text-align: center;
+}
+
+.content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.scrollable-container {
+  width: 100%;
+  max-width: 600px;
+  height: 500px; /* 设置固定的高度 */
+  overflow-y: auto; /* 使容器内部可以滚动 */
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
