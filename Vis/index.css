@@ -46,3 +46,7 @@ body {
   box-sizing: border-box;
 }
 
+p {
+  width: 70%;
+}
+
