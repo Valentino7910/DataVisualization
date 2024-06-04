@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compare</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="./compare.css" />
+  </head>
+  <body>
+    <h1>
+      Comparison of data on deaths from COVID-19 in OECD countries
+    </h1>
+    <p>The interface at the top of this chart includes several action elements to adjust the displayed data: <br>
+
+      Drop-down menus for country selection: Two drop-down menus are shown here to select data from two countries for comparison, respectively. The user can select a different OECD country from a drop-down menu and the chart will update the data based on the selection. <br>
+      
+      Year selection drop-down menu : The user can select the year of the data to view. <br>
+      
+      Trends this year: Clicking this button will display trends in deaths within the selected year. <br>
+      All trends: Click this button to view all trend data from the beginning of the pandemic to the current day. <br>
+      With these features, users can flexibly view and compare COVID-19 death data from different countries and at different times.</p>
+    <div class="compare">
+      <div class="control">
+        <a href="./index.html"><button>Back</button></a>
+        <select name="country1" id="country1">
+          <option value="----">Choose Country 1</option>
+          <option value="Australia">Australia</option>
+          <option value="Austria">Austria</option>
+          <option value="Belgium">Belgium</option>
+          <option value="Canada">Canada</option>
+          <option value="Czechia">Czechia</option>
+          <option value="Denmark">Denmark</option>
+          <option value="Finland">Finland</option>
+          <option value="France">France</option>
+          <option value="Greece">Greece</option>
+          <option value="Hungary">Hungary</option>
+          <option value="Iceland">Iceland</option>
+          <option value="Italy">Italy</option>
+          <option value="Luxembourg">Luxembourg</option>
+          <option value="Netherlands">Netherlands</option>
+          <option value="Norway">Norway</option>
+          <option value="Poland">Poland</option>
+          <option value="Portugal">Portugal</option>
+          <option value="Slovak Republic">Slovak Republic</option>
+          <option value="Spain">Spain</option>
+          <option value="Sweden">Sweden</option>
+          <option value="Switzerland">Switzerland</option>
+          <option value="United States">United States</option>
+          <option value="Chile">Chile</option>
+          <option value="Estonia">Estonia</option>
+          <option value="Latvia">Latvia</option>
+          <option value="Lithuania">Lithuania</option>
+          <option value="Slovenia">Slovenia</option>
+          <option value="Germany">Germany</option>
+          <option value="New Zealand">New Zealand</option>
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="Israel">Israel</option>
+          <option value="Mexico">Mexico</option>
+          <option value="Ireland">Ireland</option>
+          <option value="Japan">Japan</option>
+          <option value="Korea">Korea</option>
+          <option value="Colombia">Colombia</option>
+          <option value="Türkiye">Türkiye</option>
+          <option value="Costa Rica">Costa Rica</option>
+        </select>
+        <select name="country2" id="country2">
+          <option value="----">Choose Country 2</option>
+          <option value="Austria">Austria</option>
+          <option value="Australia">Australia</option>
+          <option value="Belgium">Belgium</option>
+          <option value="Canada">Canada</option>
+          <option value="Czechia">Czechia</option>
+          <option value="Denmark">Denmark</option>
+          <option value="Finland">Finland</option>
+          <option value="France">France</option>
+          <option value="Greece">Greece</option>
+          <option value="Hungary">Hungary</option>
+          <option value="Iceland">Iceland</option>
+          <option value="Italy">Italy</option>
+          <option value="Luxembourg">Luxembourg</option>
+          <option value="Netherlands">Netherlands</option>
+          <option value="Norway">Norway</option>
+          <option value="Poland">Poland</option>
+          <option value="Portugal">Portugal</option>
+          <option value="Slovak Republic">Slovak Republic</option>
+          <option value="Spain">Spain</option>
+          <option value="Sweden">Sweden</option>
+          <option value="Switzerland">Switzerland</option>
+          <option value="United States">United States</option>
+          <option value="Chile">Chile</option>
+          <option value="Estonia">Estonia</option>
+          <option value="Latvia">Latvia</option>
+          <option value="Lithuania">Lithuania</option>
+          <option value="Slovenia">Slovenia</option>
+          <option value="Germany">Germany</option>
+          <option value="New Zealand">New Zealand</option>
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="Israel">Israel</option>
+          <option value="Mexico">Mexico</option>
+          <option value="Ireland">Ireland</option>
+          <option value="Japan">Japan</option>
+          <option value="Korea">Korea</option>
+          <option value="Colombia">Colombia</option>
+          <option value="Türkiye">Türkiye</option>
+          <option value="Costa Rica">Costa Rica</option>
+        </select>
+        <select name="selectYear" id="selectYear">
+          <option value="2020">2020</option>
+          <option value="2021">2021</option>
+          <option value="2022">2022</option>
+          <option value="2023">2023</option>
+        </select>
+        <button id="trend">Line chart or bar chart</button>
+        <button id="allTrend">All trends</button>
+      </div>
+      <div id="groupBar"></div>
+    </div>
+    <script src="./compare.js"></script>
+  </body>
+</html>
